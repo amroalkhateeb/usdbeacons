@@ -1,6 +1,7 @@
 package com.example.ble_helloworld;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 
 public class KontaktBeacon {
@@ -10,12 +11,17 @@ public class KontaktBeacon {
 	
 	public KontaktBeacon(byte[] scan) {
 		advertisingPacket = scan;
+		
+		for (byte entry : scan) {
+			System.out.println(Integer.toHexString(entry));
+		}
+
 		//Parse Major Number
-		ByteBuffer wrapped = ByteBuffer.wrap(Arrays.copyOfRange(scan, 25, 27)); // big-endian by default
+		ByteBuffer wrapped = ByteBuffer.wrap(Arrays.copyOfRange(scan, 38, 40)); // big-endian by default
 		short num = wrapped.getShort();
 		Major = num;
 		//Parse Minor Number
-		wrapped = ByteBuffer.wrap(Arrays.copyOfRange(scan, 27, 29));
+		wrapped = ByteBuffer.wrap(Arrays.copyOfRange(scan, 40, 42));
 		num = wrapped.getShort();
 		Minor = num;
 	}
