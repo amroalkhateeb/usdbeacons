@@ -2,6 +2,7 @@ package com.example.ble_helloworld;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -72,7 +73,7 @@ public class MainActivity extends Activity {
 	    public void onLeScan(final BluetoothDevice device, int rssi,
 	            byte[] scanRecord) {
 	    	System.out.println("Scan Record Length: " + scanRecord.length);
-	    	KontaktBeacon beacon = new KontaktBeacon(scanRecord);
+	    	KontaktBeacon beacon = new KontaktBeacon(Arrays.copyOfRange(scanRecord, 0, 53));
 	    	if (!beacons.contains(beacon)) {
 	    		System.out.println("Adding new beacon");
 		    	beacons.add(beacon);
