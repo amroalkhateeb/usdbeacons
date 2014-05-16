@@ -11,11 +11,12 @@ public class KontaktBeacon {
 	
 	public KontaktBeacon(byte[] scan) {
 		advertisingPacket = scan;
-		
+		int count = 1;
 		for (byte entry : scan) {
+			System.out.println("Byte: " + count);
 			System.out.println(Integer.toHexString(entry));
 		}
-
+		
 		//Parse Major Number
 		ByteBuffer wrapped = ByteBuffer.wrap(Arrays.copyOfRange(scan, 38, 40)); // big-endian by default
 		short num = wrapped.getShort();
