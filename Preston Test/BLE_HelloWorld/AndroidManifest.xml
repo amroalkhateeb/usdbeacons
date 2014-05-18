@@ -5,13 +5,13 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="18"
         android:targetSdkVersion="18" />
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.INTERNET" />
-    
+
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
@@ -33,6 +33,12 @@
         <activity
             android:name="com.example.ble_helloworld.Scan"
             android:label="@string/title_activity_scan" >
+        </activity>
+        <activity
+            android:name="com.example.ble_helloworld.Green"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_green"
+            android:theme="@style/FullscreenTheme" >
         </activity>
     </application>
 

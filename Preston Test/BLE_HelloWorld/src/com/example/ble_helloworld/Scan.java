@@ -85,7 +85,11 @@ public class Scan extends Service {
         public void onCharacteristicRead(BluetoothGatt gatt,
                 BluetoothGattCharacteristic characteristic,
                 int status) {
+        	for (byte entry : characteristic.getValue()) {
+        		System.out.println(entry);
+        	}
             if (status == BluetoothGatt.GATT_SUCCESS) {
+            	
                 broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
             }
         }
