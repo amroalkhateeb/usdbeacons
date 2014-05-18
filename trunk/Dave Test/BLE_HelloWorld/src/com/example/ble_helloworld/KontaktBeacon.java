@@ -10,16 +10,14 @@ public class KontaktBeacon implements Comparable<KontaktBeacon> {
 	
 	public KontaktBeacon(byte[] scan, double rssi) {
 		advertisingPacket = scan;
-<<<<<<< .mine
-	
-=======
+
 		int count = 1;
 		for (byte entry : scan) {
 			System.out.println("Byte: " + count);
 			System.out.println(Integer.toHexString(entry));
 		}
 		
->>>>>>> .r11
+
 		//Parse Major Number
 		String major = Integer.toHexString(scan[25]) + Integer.toHexString(scan[26]);
 		major = major.replaceAll("ffffff", "");
