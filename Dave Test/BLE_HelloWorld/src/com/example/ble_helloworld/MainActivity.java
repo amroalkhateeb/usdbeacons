@@ -8,6 +8,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import com.example.ble_helloworld.KontaktBeacon;
+import com.example.ble_helloworld.R;
+import com.example.ble_helloworld.Request;
+import com.example.ble_helloworld.Scan;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -20,11 +25,13 @@ import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
@@ -32,8 +39,7 @@ public class MainActivity extends Activity {
 	BluetoothManager bluetoothManager;
 	private List<KontaktBeacon> beacons = new ArrayList<KontaktBeacon>();
 	private BluetoothAdapter mBluetoothAdapter;
-	private boolean mScanning = false;
-    private Handler mHandler = new Handler();
+    RelativeLayout layout;
     private BluetoothDevice bdevice;
     private BluetoothGatt gattServer = null;
     private ArrayList<BluetoothDevice> devices = new ArrayList<BluetoothDevice>();
@@ -59,6 +65,8 @@ public class MainActivity extends Activity {
 		    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 		    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 		}
+		layout = (RelativeLayout) findViewById(R.id.layout);
+		new BluetoothScanTask().execute();
 		
 	}
 
@@ -95,31 +103,10 @@ public class MainActivity extends Activity {
 	   }
 	};
 
-    // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 10000;
-
-    private void scanLeDevice(final boolean enable) {
-        if (enable) {
-            // Stops scanning after a pre-defined scan period.
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mScanning = false;
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                }
-            }, SCAN_PERIOD);
-
-            mScanning = true;
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
-        } else {
-            mScanning = false;
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
-        }
-        
-    }
+    
     
     public void scan(View view) {
-    	scanLeDevice(true);    	
+
     }
     
     BluetoothGatt mBluetoothGatt;
@@ -185,6 +172,74 @@ public class MainActivity extends Activity {
             	return null;
             }
         }	
+    }
+    
+    
+    class BluetoothScanTask extends AsyncTask<Void, Void, Void> {
+
+    	private boolean mScanning = false;
+        private Handler mHandler = new Handler();
+
+    	protected Void doInBackground(Void... param) {
+    		while(true) {
+    			if (!mScanning) {
+    				beacons = new ArrayList<KontaktBeacon>();
+    				scanLeDevice(true);
+    			} else {
+    					runOnUiThread(new Runnable() {
+    					     @Override
+    					     public void run() {
+    			    				if (beacons.size() > 0) {
+    			    					layout.setBackgroundColor(getColorFromMajor(beacons.get(0).getMajor()));
+    			    				}
+    					    }
+    					});
+    			}
+    		}
+        }
+    	
+    	// Stops scanning after 10 seconds.
+        private static final long SCAN_PERIOD = 5000;
+
+        private void scanLeDevice(final boolean enable) {
+            if (enable) {
+                // Stops scanning after a pre-defined scan period.
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mScanning = false;
+                        mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                    }
+                }, SCAN_PERIOD);
+
+                mScanning = true;
+                mBluetoothAdapter.startLeScan(mLeScanCallback);
+            } else {
+                mScanning = false;
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            }
+            
+        }
+        
+        private int getColorFromMajor(int major) {
+        	if (major == 50147) {
+        		return Color.GREEN;
+        	}
+        	if (major == 54172) {
+        		return Color.YELLOW;
+        	}
+        	if (major == 13115) {
+        		return Color.RED;
+        	}
+        	if (major == 62947) {
+        		return Color.BLUE;
+        	}
+        	if (major == 53963) {
+        		return Color.MAGENTA;
+        	}
+        	return Color.BLACK;
+        }
+        
     }
     
 }
