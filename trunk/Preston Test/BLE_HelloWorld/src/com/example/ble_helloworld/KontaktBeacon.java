@@ -1,30 +1,37 @@
 package com.example.ble_helloworld;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Arrays;
 
-public class KontaktBeacon {
+public class KontaktBeacon implements Comparable<KontaktBeacon> {
 	private byte[] advertisingPacket;
-	private int Major;
-	private int Minor;
+	private int major;
+	private int minor;
+	private int txPower;
+	private double distance;
 	
-	public KontaktBeacon(byte[] scan) {
+	public KontaktBeacon(byte[] scan, double rssi) {
 		advertisingPacket = scan;
+
 		int count = 1;
 		for (byte entry : scan) {
 			System.out.println("Byte: " + count);
 			System.out.println(Integer.toHexString(entry));
 		}
 		
+
 		//Parse Major Number
-		ByteBuffer wrapped = ByteBuffer.wrap(Arrays.copyOfRange(scan, 38, 40)); // big-endian by default
-		short num = wrapped.getShort();
-		Major = num;
+		String major = Integer.toHexString(scan[25]) + Integer.toHexString(scan[26]);
+		major = major.replaceAll("ffffff", "");
+		this.major = Integer.decode("0x"+major);
 		//Parse Minor Number
-		wrapped = ByteBuffer.wrap(Arrays.copyOfRange(scan, 40, 42));
-		num = wrapped.getShort();
-		Minor = num;
+		String minor = Integer.toHexString(scan[27]) + Integer.toHexString(scan[28]);
+		minor = minor.replaceAll("ffffff", "");
+		this.minor = Integer.decode("0x"+minor);
+		
+		
+		this.txPower = -77;
+		
+		distance = this.calculateDistance(txPower, rssi);
+		System.out.println("Distance: " + distance);
 	}
 	
 	public byte[] getAdvertisingPacket() {
@@ -32,23 +39,61 @@ public class KontaktBeacon {
 	}
 	
 	public int getMajor() {
-		return Major;
+		return major;
 	}
 	public void setMajor(int major) {
-		Major = major;
+		this.major = major;
 	}
 	public int getMinor() {
-		return Minor;
+		return minor;
 	}
 	public void setMinor(int minor) {
-		Minor = minor;
+		this.minor = minor;
 	}
+	
+	public int getTxPower() {
+		return txPower;
+	}
+
+	public void setTxPower(int txPower) {
+		this.txPower = txPower;
+	}
+
+	public double getDistance() {
+		return distance;
+	}
+
+	public void setDistance(double distance) {
+		this.distance = distance;
+	}
+
+	//Distance returned in meters
+	private double calculateDistance(int txPower, double rssi) {
+		  if (rssi == 0) {
+		    return -1.0; // if we cannot determine accuracy, return -1.
+		  }
+
+		  double ratio = rssi*1.0/txPower;
+		  if (ratio < 1.0) {
+			System.out.println("RSSI :" + rssi);
+			System.out.println("Major :" + major);
+			return Math.pow(ratio,10);
+		  }
+		  else {
+		    double accuracy =  (0.89976)*Math.pow(ratio,7.7095) + 0.111;    
+			System.out.println("RSSI :" + rssi);
+			System.out.println("Major :" + major);
+			return accuracy;
+		  }
+		  
+	}
+
 	
 	@Override
 	public boolean equals(Object object) {
 		if(object instanceof KontaktBeacon) {
 			KontaktBeacon other = (KontaktBeacon)object;
-			if(this.advertisingPacket == other.advertisingPacket) {
+			if(this.major == other.major && this.minor == other.minor) {
 				return true;
 			}
 		} else {
@@ -57,6 +102,11 @@ public class KontaktBeacon {
 		
 		return false;
 		
+	}
+
+	@Override
+	public int compareTo(KontaktBeacon other) {
+		return (int) (this.getDistance()-other.getDistance());
 	}
 	
 }
